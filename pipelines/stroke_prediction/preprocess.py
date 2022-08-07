@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     logger.debug("Reading downloaded data.")
     df = pd.read_csv(fn)
+    features = list(df.columns)
     y = df.pop('stroke')
     os.unlink(fn)
 
@@ -77,8 +78,8 @@ if __name__ == "__main__":
     train, validation, test = np.split(X, [int(0.7 * len(X)), int(0.85 * len(X))])
 
     logger.info("Writing out datasets to %s.", base_dir)
-    pd.DataFrame(train, columns=numeric_features+categorical_features).to_csv(f"{base_dir}/train/train.csv", header=False, index=False)
-    pd.DataFrame(validation,columns=numeric_features+categorical_features).to_csv(
+    pd.DataFrame(train, columns=features).to_csv(f"{base_dir}/train/train.csv", header=False, index=False)
+    pd.DataFrame(validation,columns=features).to_csv(
         f"{base_dir}/validation/validation.csv", header=False, index=False
     )
-    pd.DataFrame(test,columns=numeric_features+categorical_features).to_csv(f"{base_dir}/test/test.csv", header=False, index=False)
+    pd.DataFrame(test,columns=features).to_csv(f"{base_dir}/test/test.csv", header=False, index=False)
