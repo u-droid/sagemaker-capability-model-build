@@ -25,7 +25,6 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
 
-
 if __name__ == "__main__":
     logger.debug("Starting evaluation.")
     model_path = "/opt/ml/processing/model/model.tar.gz"
@@ -46,9 +45,9 @@ if __name__ == "__main__":
 
     logger.info("Performing predictions against test data.")
     predictions = model.predict(X_test)
-
+    logger.info(f"Prediction: {predictions[:20]}")
     logger.debug("Calculating Metric.")
-    metric_tup = precision_recall_fscore_support(y_test, predictions, average='weighted')
+    metric_tup = precision_recall_fscore_support(y_test, round(abs(predictions)), average='weighted')
     report_dict = {
         "classification_metrics": {
             "precision": {
