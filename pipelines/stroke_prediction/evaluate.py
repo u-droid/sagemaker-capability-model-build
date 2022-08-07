@@ -45,7 +45,7 @@ if __name__ == "__main__":
             "accuracy": {
                 "value": accuracy
             }
-        },
+        }
     }
     output_dir = "/opt/ml/processing/evaluation"
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
