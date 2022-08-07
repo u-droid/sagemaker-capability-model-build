@@ -43,7 +43,7 @@ if __name__ == "__main__":
     os.unlink(fn)
 
     feature_columns_names = list(df.columns)
-    numeric_features  = df.select_dtypes(exclude='object').columns
+    numeric_features  = list(df.select_dtypes(exclude='object').columns)
     
 
     logger.debug("Defining transformers.")
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
     )
 
-    categorical_features = df.select_dtypes(include='object').columns
+    categorical_features = list(df.select_dtypes(include='object').columns)
     categorical_transformer = Pipeline(
         steps=[
             ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
