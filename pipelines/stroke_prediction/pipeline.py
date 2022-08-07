@@ -304,7 +304,7 @@ def get_pipeline(
             property_file=evaluation_report,
             json_path="classification_metrics.accuracy.value"
         ),
-        right=0.80,
+        right=0.75,
     )
     step_cond = ConditionStep(
         name="CheckMSEStrokeEvaluation",

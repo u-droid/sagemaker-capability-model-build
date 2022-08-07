@@ -38,7 +38,7 @@ if __name__ == "__main__":
     logger.info("Performing predictions against test data.")
     predictions = model.predict(X_test)
 
-    logger.debug("Calculating mean squared error.")
+    logger.debug("Calculating Accuracy.")
     accuracy = accuracy_score(y_test, predictions)
     report_dict = {
         "classification_metrics": {
