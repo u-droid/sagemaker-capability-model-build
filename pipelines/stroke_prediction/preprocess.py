@@ -5,53 +5,20 @@ import os
 import pathlib
 import requests
 import tempfile
-
+import sys
 import boto3
+
 import numpy as np
 import pandas as pd
 
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import OrdinalEncoder, StandardScaler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
-
-
-# Since we get a headerless CSV file we specify the column names here.
-feature_columns_names = [
-    "sex",
-    "length",
-    "diameter",
-    "height",
-    "whole_weight",
-    "shucked_weight",
-    "viscera_weight",
-    "shell_weight",
-]
-label_column = "rings"
-
-feature_columns_dtype = {
-    "sex": str,
-    "length": np.float64,
-    "diameter": np.float64,
-    "height": np.float64,
-    "whole_weight": np.float64,
-    "shucked_weight": np.float64,
-    "viscera_weight": np.float64,
-    "shell_weight": np.float64,
-}
-label_column_dtype = {"rings": np.float64}
-
-
-def merge_two_dicts(x, y):
-    """Merges two dicts, returning a new copy."""
-    z = x.copy()
-    z.update(y)
-    return z
-
 
 if __name__ == "__main__":
     logger.debug("Starting preprocessing.")
@@ -66,38 +33,35 @@ if __name__ == "__main__":
     key = "/".join(input_data.split("/")[3:])
 
     logger.info("Downloading data from bucket: %s, key: %s", bucket, key)
-    fn = f"{base_dir}/data/abalone-dataset.csv"
+    fn = f"{base_dir}/data/healthcare_dataset_stroke_data.csv"
     s3 = boto3.resource("s3")
     s3.Bucket(bucket).download_file(key, fn)
 
     logger.debug("Reading downloaded data.")
-    df = pd.read_csv(
-        fn,
-        header=None,
-        names=feature_columns_names + [label_column],
-        dtype=merge_two_dicts(feature_columns_dtype, label_column_dtype),
-    )
+    df = pd.read_csv(fn)
     os.unlink(fn)
 
+    feature_columns_names = list(df.columns)
+    numeric_features  = df.select_dtypes(exclude='object').columns
+    
+
     logger.debug("Defining transformers.")
-    numeric_features = list(feature_columns_names)
-    numeric_features.remove("sex")
     numeric_transformer = Pipeline(
         steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
     )
 
-    categorical_features = ["sex"]
+    categorical_features = df.select_dtypes(include='object').columns
     categorical_transformer = Pipeline(
         steps=[
             ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
-            ("onehot", OneHotEncoder(handle_unknown="ignore")),
+            ("ordinal_encoder",OrdinalEncoder())
         ]
     )
 
     preprocess = ColumnTransformer(
         transformers=[
             ("num", numeric_transformer, numeric_features),
-            ("cat", categorical_transformer, categorical_features),
+            ("cat", categorical_transformer, categorical_features)
         ]
     )
 
@@ -113,8 +77,8 @@ if __name__ == "__main__":
     train, validation, test = np.split(X, [int(0.7 * len(X)), int(0.85 * len(X))])
 
     logger.info("Writing out datasets to %s.", base_dir)
-    pd.DataFrame(train).to_csv(f"{base_dir}/train/train.csv", header=False, index=False)
-    pd.DataFrame(validation).to_csv(
+    pd.DataFrame(train, columns=numeric_features+categorical_features).to_csv(f"{base_dir}/train/train.csv", header=False, index=False)
+    pd.DataFrame(validation,columns=numeric_features+categorical_features).to_csv(
         f"{base_dir}/validation/validation.csv", header=False, index=False
     )
-    pd.DataFrame(test).to_csv(f"{base_dir}/test/test.csv", header=False, index=False)
+    pd.DataFrame(test,columns=numeric_features+categorical_features).to_csv(f"{base_dir}/test/test.csv", header=False, index=False)

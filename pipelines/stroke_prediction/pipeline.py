@@ -1,4 +1,4 @@
-"""Example workflow pipeline script for abalone pipeline.
+"""Example workflow pipeline script for Stroke Prediction pipeline.
 
                                                . -ModelStep
                                               .
@@ -125,13 +125,13 @@ def get_pipeline(
     sagemaker_project_arn=None,
     role=None,
     default_bucket=None,
-    model_package_group_name="AbalonePackageGroup",
-    pipeline_name="AbalonePipeline",
-    base_job_prefix="Abalone",
-    processing_instance_type="ml.m5.xlarge",
-    training_instance_type="ml.m5.xlarge",
+    model_package_group_name="StrokePackageGroup",
+    pipeline_name="StrokePipeline",
+    base_job_prefix="Stroke",
+    processing_instance_type="ml.m5.large",
+    training_instance_type="ml.m5.large",
 ):
-    """Gets a SageMaker ML Pipeline instance working with on abalone data.
+    """Gets a SageMaker ML Pipeline instance working with on stroke data.
 
     Args:
         region: AWS region to create and run the pipeline.
@@ -154,7 +154,7 @@ def get_pipeline(
     )
     input_data = ParameterString(
         name="InputDataUrl",
-        default_value=f"s3://sagemaker-servicecatalog-seedcode-{region}/dataset/abalone-dataset.csv",
+        default_value=f"s3://sagemaker-ap-south-1-543203651503/healthcare/stroke-prediction/new/healthcare-dataset-stroke-data.csv",
     )
 
     # processing step for feature engineering
@@ -162,7 +162,7 @@ def get_pipeline(
         framework_version="0.23-1",
         instance_type=processing_instance_type,
         instance_count=processing_instance_count,
-        base_job_name=f"{base_job_prefix}/sklearn-abalone-preprocess",
+        base_job_name=f"{base_job_prefix}/sklearn-stroke-preprocess",
         sagemaker_session=pipeline_session,
         role=role,
     )
@@ -176,12 +176,12 @@ def get_pipeline(
         arguments=["--input-data", input_data],
     )
     step_process = ProcessingStep(
-        name="PreprocessAbaloneData",
+        name="PreprocessStrokeData",
         step_args=step_args,
     )
 
     # training step for generating model artifacts
-    model_path = f"s3://{sagemaker_session.default_bucket()}/{base_job_prefix}/AbaloneTrain"
+    model_path = f"s3://{sagemaker_session.default_bucket()}/{base_job_prefix}/strokeTrain"
     image_uri = sagemaker.image_uris.retrieve(
         framework="xgboost",
         region=region,
@@ -194,7 +194,7 @@ def get_pipeline(
         instance_type=training_instance_type,
         instance_count=1,
         output_path=model_path,
-        base_job_name=f"{base_job_prefix}/abalone-train",
+        base_job_name=f"{base_job_prefix}/stroke-train",
         sagemaker_session=pipeline_session,
         role=role,
     )
@@ -225,7 +225,7 @@ def get_pipeline(
         },
     )
     step_train = TrainingStep(
-        name="TrainAbaloneModel",
+        name="TrainStrokeModel",
         step_args=step_args,
     )
 
@@ -235,7 +235,7 @@ def get_pipeline(
         command=["python3"],
         instance_type=processing_instance_type,
         instance_count=1,
-        base_job_name=f"{base_job_prefix}/script-abalone-eval",
+        base_job_name=f"{base_job_prefix}/script-stroke-eval",
         sagemaker_session=pipeline_session,
         role=role,
     )
@@ -258,12 +258,12 @@ def get_pipeline(
         code=os.path.join(BASE_DIR, "evaluate.py"),
     )
     evaluation_report = PropertyFile(
-        name="AbaloneEvaluationReport",
+        name="strokeEvaluationReport",
         output_name="evaluation",
         path="evaluation.json",
     )
     step_eval = ProcessingStep(
-        name="EvaluateAbaloneModel",
+        name="EvaluateStrokeModel",
         step_args=step_args,
         property_files=[evaluation_report],
     )
@@ -293,7 +293,7 @@ def get_pipeline(
         model_metrics=model_metrics,
     )
     step_register = ModelStep(
-        name="RegisterAbaloneModel",
+        name="RegisterstrokeModel",
         step_args=step_args,
     )
 
@@ -307,7 +307,7 @@ def get_pipeline(
         right=6.0,
     )
     step_cond = ConditionStep(
-        name="CheckMSEAbaloneEvaluation",
+        name="CheckMSEStrokeEvaluation",
         conditions=[cond_lte],
         if_steps=[step_register],
         else_steps=[],
