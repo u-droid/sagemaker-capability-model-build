@@ -9,12 +9,21 @@ import numpy as np
 import pandas as pd
 import xgboost
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_recall_fscore_support
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
 
 if __name__ == "__main__":
@@ -38,19 +47,25 @@ if __name__ == "__main__":
     logger.info("Performing predictions against test data.")
     predictions = model.predict(X_test)
 
-    logger.debug("Calculating Accuracy.")
-    accuracy = accuracy_score(y_test, np.round(abs(predictions)), normalize=False)
+    logger.debug("Calculating Metric.")
+    metric_tup = precision_recall_fscore_support(y_test, predictions, average='weighted')
     report_dict = {
         "classification_metrics": {
-            "accuracy": {
-                "value": accuracy
+            "precision": {
+                "value": metric_tup[0]
+            },
+            "recall":{
+                "value": metric_tup[1]
+            },
+            "fscore":{
+                "value": metric_tup[2]
             }
         }
     }
     output_dir = "/opt/ml/processing/evaluation"
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-    logger.info("Writing out evaluation report with accuracy: %f", accuracy)
+    logger.info(f"Writing out evaluation report : {report_dict}")
     evaluation_path = f"{output_dir}/evaluation.json"
     with open(evaluation_path, "w") as f:
-        f.write(json.dumps(report_dict))
+        f.write(json.dumps(report_dict, cls=NpEncoder))

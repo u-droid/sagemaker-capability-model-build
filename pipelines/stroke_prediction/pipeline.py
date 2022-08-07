@@ -303,7 +303,7 @@ def get_pipeline(
         left=JsonGet(
             step_name=step_eval.name,
             property_file=evaluation_report,
-            json_path="classification_metrics.accuracy.value"
+            json_path="classification_metrics.fscore.value"
         ),
         right=0.75,
     )
