@@ -47,12 +47,10 @@ if __name__ == "__main__":
             }
         },
     }
-    logger.info(f"evaluation report: {report_dict}")
-
     output_dir = "/opt/ml/processing/evaluation"
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-    logger.info("Writing out evaluation report with mse: %f", mse)
+    logger.info("Writing out evaluation report with accuracy: %f", accuracy)
     evaluation_path = f"{output_dir}/evaluation.json"
     with open(evaluation_path, "w") as f:
         f.write(json.dumps(report_dict))
