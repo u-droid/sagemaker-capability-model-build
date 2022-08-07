@@ -47,7 +47,7 @@ if __name__ == "__main__":
     predictions = model.predict(X_test)
     logger.info(f"Prediction: {predictions[:20]}")
     logger.debug("Calculating Metric.")
-    metric_tup = precision_recall_fscore_support(y_test, round(abs(predictions)), average='weighted')
+    metric_tup = precision_recall_fscore_support(y_test, np.round(abs(predictions)), average='weighted')
     report_dict = {
         "classification_metrics": {
             "precision": {
