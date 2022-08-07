@@ -66,7 +66,7 @@ if __name__ == "__main__":
     )
 
     logger.info("Applying transforms.")
-    y = df.pop("rings")
+    y = df.pop("stroke")
     X_pre = preprocess.fit_transform(df)
     y_pre = y.to_numpy().reshape(len(y), 1)
 
