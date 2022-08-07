@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import xgboost
 
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -40,6 +40,7 @@ if __name__ == "__main__":
 
     logger.debug("Calculating mean squared error.")
     mse = mean_squared_error(y_test, predictions)
+    r2 = r2_score(y_test, predictions)
     std = np.std(y_test - predictions)
     report_dict = {
         "regression_metrics": {
@@ -47,8 +48,12 @@ if __name__ == "__main__":
                 "value": mse,
                 "standard_deviation": std
             },
+            "r2":{
+                "value": r2
+            }
         },
     }
+    logger.info(f"evaluation report: {report_dict}")
 
     output_dir = "/opt/ml/processing/evaluation"
     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
