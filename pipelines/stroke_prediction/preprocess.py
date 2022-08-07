@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     logger.debug("Reading downloaded data.")
     df = pd.read_csv(fn)
+
     os.unlink(fn)
 
     feature_columns_names = list(df.columns)
@@ -66,6 +67,8 @@ if __name__ == "__main__":
     )
 
     logger.info("Applying transforms.")
+    logger.info(f"Columns: {df.columns}")
+    logger.info(f"df: {df.head()}")
     y = df.pop("stroke")
     X_pre = preprocess.fit_transform(df)
     y_pre = y.to_numpy().reshape(len(y), 1)
