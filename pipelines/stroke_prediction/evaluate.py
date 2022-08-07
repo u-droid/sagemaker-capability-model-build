@@ -39,7 +39,7 @@ if __name__ == "__main__":
     predictions = model.predict(X_test)
 
     logger.debug("Calculating Accuracy.")
-    accuracy = accuracy_score(y_test, predictions)
+    accuracy = accuracy_score(y_test, np.round(abs(predictions)), normalize=False)
     report_dict = {
         "classification_metrics": {
             "accuracy": {
