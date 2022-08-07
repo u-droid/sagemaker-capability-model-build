@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import xgboost
 
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import accuracy_score
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -39,17 +39,11 @@ if __name__ == "__main__":
     predictions = model.predict(X_test)
 
     logger.debug("Calculating mean squared error.")
-    mse = mean_squared_error(y_test, predictions)
-    r2 = r2_score(y_test, predictions)
-    std = np.std(y_test - predictions)
+    accuracy = accuracy_score(y_test, predictions)
     report_dict = {
-        "regression_metrics": {
-            "mse": {
-                "value": mse,
-                "standard_deviation": std
-            },
-            "r2":{
-                "value": r2
+        "classification_metrics": {
+            "accuracy": {
+                "value": accuracy
             }
         },
     }
