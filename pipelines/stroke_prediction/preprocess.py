@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     logger.debug("Reading downloaded data.")
     df = pd.read_csv(fn)
-
+    y = df.pop('stroke')
     os.unlink(fn)
 
     feature_columns_names = list(df.columns)
@@ -47,6 +47,7 @@ if __name__ == "__main__":
     
 
     logger.debug("Defining transformers.")
+   
     numeric_transformer = Pipeline(
         steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
     )
@@ -66,11 +67,6 @@ if __name__ == "__main__":
         ]
     )
 
-    logger.info("Applying transforms.")
-    logger.info(f"Columns: {df.columns}")
-    logger.info(f"df: {df.head()}")
-    y = df["stroke"]
-    df = df.drop('stroke',axis=1)
     X_pre = preprocess.fit_transform(df)
     y_pre = y.to_numpy().reshape(len(y), 1)
 
