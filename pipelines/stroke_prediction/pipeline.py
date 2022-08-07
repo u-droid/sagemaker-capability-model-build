@@ -199,7 +199,7 @@ def get_pipeline(
         role=role,
     )
     xgb_train.set_hyperparameters(
-        objective="reg:linear",
+        objective="reg:logistic",
         num_round=50,
         max_depth=5,
         eta=0.2,
@@ -207,6 +207,7 @@ def get_pipeline(
         min_child_weight=6,
         subsample=0.7,
         silent=0,
+        scale_pos_weight=99
     )
     step_args = xgb_train.fit(
         inputs={
